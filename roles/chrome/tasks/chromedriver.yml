@@ -1,0 +1,35 @@
+---
+- name: Get installed ChromeDriver version
+  shell: "{{ chromedriver_path }} --version"
+  failed_when: no
+  changed_when: no
+  register: chromedriver_installed_version
+
+- name: Get the latest release for ChromeDriver
+  uri:
+    url: "{{ chromedriver_latest_version }}"
+    return_content: yes
+  register: chromedriver_webpage
+  when: chromedriver_version == "latest"
+
+- name: Override ChromeDriver version variable when latest
+  set_fact:
+    chromedriver_version: "{{ chromedriver_webpage.content|trim }}"
+  when: chromedriver_version == "latest"
+
+- name: Install ChromeDriver
+  block:
+    - name: Download ChromeDriver archive
+      get_url:
+        url: "{{ chromedriver_url }}"
+        dest: "{{ chromedriver_download_path }}"
+
+    - name: Unarchive ChromeDriver archive
+      unarchive:
+        src: "{{ chromedriver_download_path }}"
+        dest: "{{ chromedriver_install_path }}"
+        owner: root
+        group: root
+        mode: 0755
+        copy: no
+  when: not chromedriver_installed_version.stdout or chromedriver_version not in chromedriver_installed_version.stdout

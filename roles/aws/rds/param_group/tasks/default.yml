@@ -1,0 +1,8 @@
+---
+- name: Set Amazon RDS param group parameters
+  rds_param_group:
+    state: "present"
+    engine: "{{ engine }}"
+    name: "{{ group_name }}"
+    description: "{{ group_description }}"
+    params: "{{ params }}"

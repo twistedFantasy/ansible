@@ -1,0 +1,34 @@
+---
+- name: Get installed Google Chrome version
+  shell: "{{ chrome_path }} --version"
+  failed_when: no
+  changed_when: no
+  register: chrome_installed_version
+
+- name: Install Chrome
+  when: not chrome_installed_version.stdout or chrome_version not in chrome_installed_version.stdout
+  block:
+    - name: Install Chrome from package
+      when: chrome_source == 'package'
+      block:
+        - name: Install Google Linux signing key
+          apt_key:
+            url: "{{ google_linux_signing_key }}"
+            state: present
+
+        - name: Setup Google Chrome repository
+          apt_repository:
+            repo: "{{ chrome_package_repo }}"
+            filename: "{{ chrome_filename }}"
+            state: present
+            update_cache: yes
+
+        - name: Install Google Chrome from repository
+          apt:
+            name: "{{ chrome_package_name }}"
+            state: present
+
+    - name: Install Google Chrome from deb package
+      apt:
+        deb: "{{ chrome_remote_deb }}"
+      when: chrome_source == 'deb'

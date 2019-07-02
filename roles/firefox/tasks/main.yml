@@ -1,0 +1,5 @@
+---
+- import_tasks: firefox.yml
+  tags: firefox
+- import_tasks: geckodriver.yml
+  tags: geckodriver

@@ -1,0 +1,30 @@
+---
+- name: Get installed GeckoDriver version
+  shell: "{{ geckodriver_path }} --version"
+  failed_when: no
+  changed_when: no
+  register: geckodriver_installed_version
+
+- name: Install GeckoDriver
+  block:
+    - name: Download GeckoDriver archive
+      get_url:
+        url: "{{ geckodriver_url }}"
+        dest: "{{ geckodriver_download_path }}"
+
+    - name: Unarchive GeckoDriver archive
+      unarchive:
+        src: "{{ geckodriver_download_path }}"
+        dest: "{{ geckodriver_unarchive_path }}"
+        owner: root
+        group: root
+        mode: 0755
+        remote_src: yes
+
+    - name: Copy GeckoDriver
+      copy:
+        src: "{{ geckodriver_unarchive_path }}/geckodriver"
+        dest: "{{ geckodriver_path }}"
+        remote_src: yes
+        mode: a+x
+  when: not geckodriver_installed_version.stdout or geckodriver_version not in geckodriver_installed_version.stdout

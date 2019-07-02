@@ -1,0 +1,28 @@
+---
+- name: Get installed Firefox version
+  shell: "{{ firefox_path }} --version"
+  failed_when: no
+  changed_when: no
+  register: firefox_installed_version
+
+- name: Install Firefox
+  block:
+    - name: Download Firefox archive
+      get_url:
+        url: "{{ firefox_url }}"
+        dest: "{{ firefox_download_path }}"
+
+    - name: Unarchive Firefox archive
+      unarchive:
+        src: "{{ firefox_download_path }}"
+        dest: "{{ firefox_unarchive_path }}"
+        mode: 0755
+        copy: no
+
+    - name: Create symbolic link
+      file:
+        src: "{{ firefox_unarchive_path }}/firefox/firefox"
+        dest: "{{ firefox_path }}"
+        state: link
+        mode: a+x
+  when: not firefox_installed_version.stdout or firefox_version not in firefox_installed_version.stdout

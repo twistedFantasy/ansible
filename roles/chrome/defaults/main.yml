@@ -1,0 +1,21 @@
+---
+# google
+google_linux_signing_key: "https://dl.google.com/linux/linux_signing_key.pub"
+
+# chrome
+chrome_source: "deb"  # package
+chrome_version: "65.0.3325.181"  # stable for package source
+chrome_filename: "google-chrome"
+chrome_package_name: "google-chrome-64_{{ chrome_version }}"
+chrome_package_repo: "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
+chrome_remote_deb: "https://s3.us-east-2.amazonaws.com/macmillan-ansible/deb/chrome/chrome64_{{ chrome_version }}.deb"  # FIXME: use my own S3 or server
+chrome_path: "{{ chrome_install_path }}/google-chrome"
+chrome_install_path: /usr/bin
+
+# chromedriver
+chromedriver_version: "2.37"
+chromedriver_latest_version: "http://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+chromedriver_url: "http://chromedriver.storage.googleapis.com/{{ chromedriver_version }}/chromedriver_linux64.zip"
+chromedriver_download_path: "/tmp/chromedriver_linux64-{{ chromedriver_version }}.zip"
+chromedriver_path: "{{ chromedriver_install_path }}/chromedriver"
+chromedriver_install_path: /usr/local/bin

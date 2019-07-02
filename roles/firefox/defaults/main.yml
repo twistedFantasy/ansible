@@ -1,0 +1,17 @@
+---
+# firefox
+firefox_version: "64.0.2"
+firefox_url: "http://ftp.mozilla.org/pub/firefox/releases/{{ firefox_version }}/linux-x86_64/en-US/firefox-{{ firefox_version }}.tar.bz2"
+firefox_download_path: "/tmp/firefox_linux64-{{ firefox_version }}.tar.gz"
+firefox_unarchive_path: "/usr/local"
+firefox_path: "{{ firefox_install_path }}/firefox"
+firefox_install_path: /usr/bin
+
+# geckodriver
+geckodriver_version: "0.23.0"
+geckodriver_url: "https://github.com/mozilla/geckodriver/releases/download/v{{ geckodriver_version }}/geckodriver-v{{ geckodriver_version }}-linux64.tar.gz"
+geckodriver_download_path: "/tmp/geckodriver_linux64-{{ geckodriver_version }}.tar.gz"
+geckodriver_unarchive_path: "/tmp"
+geckodriver_path: "{{ geckodriver_install_path }}/geckodriver"
+geckodriver_install_path: /usr/local/bin
+
