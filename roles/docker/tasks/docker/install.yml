@@ -1,0 +1,57 @@
+---
+- name: Check if docker already installed
+  shell: "{{ docker_path }} --version"
+  failed_when: no
+  changed_when: no
+  register: docker_installed_version
+
+- name: Set docker facts
+  set_fact:
+    docker:
+      installed: "{{ not docker_installed_version.stderr }}"
+      version: "{{ '' if docker_installed_version.stderr else docker_installed_version.stdout }}"
+
+- when: not docker.installed or docker_version not in docker.version
+  block:
+    - when: source == 'package' and os_family in supported_os_families
+      block:
+        - name: Install docker-cli from package
+          become: yes
+          apt:
+            deb: "{{ docker_cli_download_url }}"
+            update_cache: yes
+
+        - name: Install docker from package
+          become: yes
+          apt:
+            deb: "{{ docker_download_url }}"
+            update_cache: yes
+
+    - when: source == 'binary'
+      block:
+        - name: Create temporary folder
+          tempfile:
+            state: directory
+          register: docker_temp_dir
+
+        - name: Download docker binary
+          get_url:
+            url: "{{ docker_download_urls[source] }}"
+            dest: "{{ docker_temp_dir.path }}/docker.tgz"
+
+        - name: Unarchive docker binary
+          become: yes
+          unarchive:
+            src: "{{ docker_temp_dir.path }}/docker.tgz"
+            dest: "/usr/bin/"
+            remote_src: yes
+            extra_opts:
+              - --strip-components=1
+
+          # FIXME: configura systemd for docker
+      always:
+        - name: Delete temporary folder
+          when: docker_temp_dir and docker_temp_dir.path|bool
+          file:
+            name: "{{ docker_temp_dir.path }}"
+            state: absent

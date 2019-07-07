@@ -1,0 +1,51 @@
+---
+- name: Check if containerd already installed
+  shell: "{{ containerd_path }} --version"
+  failed_when: no
+  changed_when: no
+  register: containerd_installed_version
+
+- name: Set containerd facts
+  set_fact:
+    containerd:
+      installed: "{{ not containerd_installed_version.stderr }}"
+      version: "{{ '' if containerd_installed_version.stderr  else containerd_installed_version.stdout }}"
+
+- when: not containerd.installed or containerd_version not in containerd.version
+  block:
+    - when: source == 'package' and os_family in supported_os_families
+      block:
+        - name: Install containerd from package
+          become: yes
+          apt:
+            deb: "{{ containerd_download_url }}"
+            update_cache: yes
+
+    - when: source == 'binary'
+      block:
+        - name: Create temporary folder
+          tempfile:
+            state: directory
+          register: containerd_temp_dir
+
+        - name: Download containerd binary
+          get_url:
+            url: "{{ containerd_download_urls[source] }}"
+            dest: "{{ containerd_temp_dir.path }}/containerd.tar.gz"
+
+        - name: Unarchive containerd binary
+          become: yes
+          unarchive:
+            src: "{{ containerd_temp_dir.path }}/containerd.tar.gz"
+            dest: "/"
+            remote_src: yes
+            extra_opts:
+              - --no-overwrite-dir
+
+          # FIXME: configura systemd for containerd
+      always:
+        - name: Delete temporary folder
+          when: when containerd_temp_dir and containerd_temp_dir.path|bool
+          file:
+            name: "{{ containerd_temp_dir.path }}"
+            state: absent

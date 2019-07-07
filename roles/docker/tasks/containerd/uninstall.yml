@@ -1,0 +1,33 @@
+---
+- when: source == 'package'
+  block:
+    - name: "Delete containerd (Debian/package)"
+      when: os_family == 'Debian'
+      become: yes
+      apt:
+        name: containerd.io
+        state: absent
+        purge: yes
+        autoremove: yes
+
+    - when: os_family == 'CentOS'
+      block:
+        - name: "Delete containerd (CentOS/package)"
+          when: distribution == 'CentOS'
+          become: yes
+          yum:
+            name: containerd.io
+            state: absent
+            autoremove: yes
+
+        - name: "Delete containerd (Fedora/package)"
+          when: distribution == 'Fedora'
+          become: yes
+          dnf:
+            name: containerd.io
+            state: absent
+            autoremove: yes
+
+#- when: source == 'binary'  # FIXME:
+#  block:
+#    - name: "Delete containerd ({{ distribution }}/binary)"

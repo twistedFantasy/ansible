@@ -1,0 +1,57 @@
+---
+# configuration
+role_action: "install"  # ['install', 'uninstall']
+uninstall_all: false  # if true, then /var/lib/docker/ will be deleted
+source: "package"  # ['package', 'binary']
+supported_os_families: ['Debian', 'CentOS']
+os_family: "{{ ansible_facts['os_family'] }}"
+distribution: "{{ ansible_facts['distribution'] | lower }}"
+distribution_release: "{{ ansible_facts['distribution_release'] | lower }}"
+os_architecture:
+  Debian: "amd64"
+  CentOS: "x86_64"
+
+# containerd
+containerd_version: "1.2.6"
+containerd_subversion: "-3"
+containerd_path: "containerd"
+containerd_filenames:
+  Debian: "containerd.io_{{ containerd_version }}{{ containerd_subversion }}_{{ os_architecture[os_family] }}.deb"
+  CentOS: "containerd.io-{{ containerd_version }}{{ containerd_subversion }}_{{ os_architecture[os_family] }}.rpm"
+containerd_filename: "{{ containerd_filenames[os_family] }}"
+containerd_download_urls:
+  Debian: "{{ docker_download_location }}/{{ containerd_filename }}"
+  CentOS: "{{ docker_download_location }}/{{ containerd_filename }}"
+  binary: "https://github.com/containerd/containerd/releases/download/v{{ containerd_version }}/containerd-{{ containerd_version }}.linux-amd64.tar.gz"
+containerd_download_url: "{{ containerd_download_urls[os_family] }}"
+
+# docker
+docker_version: "18.09.7"
+docker_subversion: "~3-0"
+docker_path: "docker"
+docker_packages: ['docker-ce-cli', 'docker-ce']
+docker_files_location: "/var/lib/docker/"
+docker_base_download_url: "https://download.docker.com/linux/"
+docker_download_locations:
+  Debian: "{{ docker_base_download_url }}{{ distribution }}/dists/{{ distribution_release }}/pool/stable/{{ os_architecture[os_family] }}"
+  CentOS: "{{ docker_base_download_url }}{{ distribution }}/{{ distribution_release }}/{{ os_architecture[os_family] }}/stable/Packages"
+  binary: "{{ docker_base_download_url }}static/stable/x86_64"
+docker_download_location: "{{ docker_download_locations[os_family] }}"
+docker_filenames:
+  Debian: "docker-ce_{{ docker_version }}{{ docker_subversion }}~{{ distribution }}-{{ distribution_release }}_{{ os_architecture[os_family] }}.deb"
+  CentOS: "docker-ce-{{ docker_version }}{{ docker_subversion }}.fc{{ distribution_release }}.{{ os_architecture[os_family] }}.rpm"
+  binary: "docker-{{ docker_version }}.tgz"
+docker_filename: "{{ docker_filenames[os_family] }}"
+docker_cli_filenames:
+  Debian: "docker-ce-cli_{{ docker_version }}{{ docker_subversion }}~{{ distribution }}-{{ distribution_release }}_{{ os_architecture[os_family] }}.deb"
+  CentOS: "docker-ce-cli-{{ docker_version }}{{ docker_subversion }}.fc{{ distribution_release }}.{{ os_architecture[os_family] }}.rpm"
+docker_cli_filename: "{{ docker_cli_filenames[os_family] }}"
+docker_cli_download_urls:
+  Debian: "{{ docker_download_location }}/{{ docker_cli_filename }}"
+  CentOS: "{{ docker_download_location }}/{{ docker_cli_filename }}"
+docker_cli_download_url: "{{ docker_cli_download_urls[os_family] }}"
+docker_download_urls:
+  Debian: "{{ docker_download_location }}/{{ docker_filename }}"
+  CentOS: "{{ docker_download_location }}/{{ docker_filename }}"
+  binary: "{{ docker_download_locations['binary'] }}/{{ docker_filenames['binary'] }}"
+docker_download_url: "{{ docker_download_urls[os_family] }}"

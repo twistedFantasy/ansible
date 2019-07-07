@@ -1,0 +1,43 @@
+---
+- when: source == 'package'
+  block:
+    - name: "Delete docker-cli & docker (Debian/package)"
+      when: os_family == 'Debian'
+      become: yes
+      apt:
+        name: "{{ item }}"
+        state: absent
+        purge: yes
+        autoremove: yes
+      loop: "{{ docker_packages }}"
+
+    - when: os_family == 'CentOS'
+      block:
+        - name: "Delete docker (CentOS/package)"
+          when: distribution == 'CentOS'
+          become: yes
+          yum:
+            name: "{{ item }}"
+            state: absent
+            autoremove: yes
+          loop: "{{ docker_packages }}"
+
+        - name: "Delete docker (Fedora/package)"
+          when: distribution == 'Fedora'
+          become: yes
+          dnf:
+            name: "{{ item }}"
+            state: absent
+            autoremove: yes
+          loop: "{{ docker_packages }}"
+
+    - name: "Delete {{ docker_files_location }} ({{ os_family}})"
+      when: uninstall_all|bool
+      become: yes
+      file:
+        path: "{{ docker_files_location }}"
+        state: absent
+
+#- when: source == 'binary'  # FIXME:
+#  block:
+#    - name: "Delete docker ({{ distribution }}/binary)"

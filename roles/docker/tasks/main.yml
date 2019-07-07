@@ -1,0 +1,17 @@
+---
+- debug:
+    msg: "Supported OS families({{ supported_os_families | join(',') }})"
+
+- when: role_action == 'install'
+  block:
+    - import_tasks: containerd/install.yml
+      tags: containerd-install
+    - import_tasks: docker/install.yml
+      tags: docker-install
+
+- when: role_action == 'uninstall'
+  block:
+    - import_tasks: containerd/uninstall.yml
+      tags: containerd-uninstall
+    - import_tasks: docker/uninstall.yml
+      tags: docker-uninstall
