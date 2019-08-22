@@ -1,0 +1,34 @@
+---
+- name: Check if codedeploy agent already installed
+  shell: service codedeploy-agent status
+  failed_when: no
+  changed_when: no
+  register: codedeploy_agent_installed_version
+
+- name: Set codedeploy agent facts
+  set_fact:
+    codedeploy_agent:
+      installed: "{{ not codedeploy_agent_installed_version.stderr }}"
+
+- when: not codedeploy_agent.installed
+  block:
+  - name: Install the latest version of ruby and wget
+    yum:
+      update_cache: yes
+      name: ['ruby', 'wget']
+      state: latest
+
+  - name: Download codedeploy agent
+    get_url:
+      url: "https://aws-codedeploy-{{ region }}.s3.{{ region }}.amazonaws.com/latest/install"
+      dest: "/home/{{ user }}"
+
+  - name: Change chmod +x
+    file:
+      dest: "/home/{{ user }}/install"
+      mode: a+x
+
+  - name: Install
+    shell: ./install auto
+    args:
+      chdir:  "/home/{{ user }}/"
