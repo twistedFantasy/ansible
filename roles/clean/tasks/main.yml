@@ -1,0 +1,14 @@
+---
+- name: Find files which should be deleted
+  find:
+    paths: "{{ location }}"
+    patterns: "{{ patter }}"
+    use:
+      regex: "{{ regex }}"
+  register: files_to_delete
+
+- name: Delete files
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ files_to_delete.files }}"

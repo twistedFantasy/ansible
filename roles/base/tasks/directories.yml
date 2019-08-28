@@ -1,0 +1,10 @@
+---
+- name: Create base directories
+  file:
+    state: directory
+    follow: true
+    path: "{{ item }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+    mode: 0775
+  with_items: "{{ dirs }}"

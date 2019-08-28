@@ -1,0 +1,12 @@
+---
+- name: Create cron configuration
+  become: yes
+  template:
+    src: "templates/cron.d/{{ item }}.j2"
+    dest: "/etc/cron.d/{{ item }}"
+  with_items: "{{ jobs }}"
+
+- name: Apply exising cron configuration
+  become: yes
+  shell: /etc/init.d/crond reload
+  changed_when: no
