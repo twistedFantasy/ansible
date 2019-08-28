@@ -1,0 +1,11 @@
+---
+- name: Create symlinks
+  become: yes
+  file:
+    state: link
+    follow: true
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ user }}"
+    group: "{{ group }}"
+  with_items: "{{ items }}"
