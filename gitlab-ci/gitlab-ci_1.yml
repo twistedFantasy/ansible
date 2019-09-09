@@ -1,0 +1,25 @@
+image: ubuntu
+
+variables:
+  ANSIBLE_VERSION: williamyeh/ansible:centos7
+
+stages:
+  - deploy
+
+deploy-to-stg:
+  image: "$ANSIBLE_VERSION"
+  stage: deploy
+  dependencies: []
+  variables:
+    ANSIBLE_HOST_KEY_CHECKING: "False"
+    ANSIBLE_PIPELINING: "True"
+  script:
+    - cd ansible
+    - echo 'Ansible refuses to read from a world-writeable folder, hence' && chmod -v 700 $(pwd)
+    - eval $(ssh-agent -s)
+    - (if [ "${CI_COMMIT_REF_SLUG}" == "develop" ]; then ssh-add <(echo "${STG_AUTHORIZE_KEY}"); else ssh-add <(echo "${PRD_AUTHORIZE_KEY}"); fi);
+    - ansible-playbook --extra-vars="git_ref=${CI_COMMIT_REF_SLUG}" --inventory=hosts/${CI_COMMIT_REF_SLUG} playbooks/test/main.yml
+    - ssh-agent -k
+  only:
+    - master
+    - develop
